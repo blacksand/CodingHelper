@@ -15,7 +15,8 @@ namespace Blacksand
             _beginPoint = beginPoint;
             _endPoint = endPoint;
             Regularize();
-        }
+        }
+
         // 获取选中的文本, 如无选择, 则获取全部文本
         static public CodeRange FromDocument(TextDocument doc)
         {

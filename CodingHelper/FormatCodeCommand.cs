@@ -17,12 +17,11 @@ namespace Blacksand
 
         public override object Execute(DTE2 application, AddIn addin, object varIn)
         {
-            TextDocument doc = (TextDocument) application.ActiveDocument.Object("TextDocument");
-
-            if (doc != null)
+            if (application.ActiveDocument != null)
             {
 	            try
 	            {
+                    TextDocument doc = (TextDocument) application.ActiveDocument.Object("TextDocument");
 	                CodeRange range = CodeRange.FromDocument(doc);
                     //////////////////////////////////////////////////////////////////////////
                     Logger.WriteMessage(range.ToString());
@@ -32,14 +31,9 @@ namespace Blacksand
 	                {
 		                string text = range.Text;
                         string extName = System.IO.Path.GetExtension(application.ActiveDocument.Name);
-                        
                         ExternalFormat(ref text, extName);
-                        //ExternalFormat(ref text, application.ActiveDocument.);
-
 		                ApplyIndent(ref text, range.IndentColumn);
 		                PutTextBack(range, text);
-                        //doc.Selection.MoveToPoint(range.BeginPoint, false);
-                        //doc.Selection.MoveToPoint(range.EndPoint, true);
 	                }
 	            }
 	            catch (Exception ex)

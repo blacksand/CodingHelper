@@ -7,30 +7,38 @@ using System.Collections.Generic;
 
 namespace Blacksand
 {
-	/// <summary>用于实现外接程序的对象。</summary>
-	/// <seealso class='IDTExtensibility2' />
-	public class CodingHelper : IDTExtensibility2, IDTCommandTarget
-	{
-		/// <summary>实现外接程序对象的构造函数。请将您的初始化代码置于此方法内。</summary>
-		public CodingHelper()
-		{
+    /// <summary>用于实现外接程序的对象。</summary>
+    /// <seealso class='IDTExtensibility2' />
+    public class CodingHelper : IDTExtensibility2, IDTCommandTarget
+    {
+        /// <summary>实现外接程序对象的构造函数。请将您的初始化代码置于此方法内。</summary>
+        public CodingHelper()
+        {
             _helperCommands = new Dictionary<string, HelperCommand>();
         }
 
-		/// <summary>实现 IDTExtensibility2 接口的 OnConnection 方法。接收正在加载外接程序的通知。</summary>
-		/// <param term='application'>宿主应用程序的根对象。</param>
-		/// <param term='connectMode'>描述外接程序的加载方式。</param>
-		/// <param term='addInInst'>表示此外接程序的对象。</param>
-		/// <seealso class='IDTExtensibility2' />
-		public void OnConnection(object application, ext_ConnectMode connectMode, object addInInst, ref Array custom)
-		{
-			_applicationObject = (DTE2)application;
-			_addInInstance = (AddIn)addInInst;
+        /// <summary>实现 IDTExtensibility2 接口的 OnConnection 方法。接收正在加载外接程序的通知。</summary>
+        /// <param term='application'>宿主应用程序的根对象。</param>
+        /// <param term='connectMode'>描述外接程序的加载方式。</param>
+        /// <param term='addInInst'>表示此外接程序的对象。</param>
+        /// <seealso class='IDTExtensibility2' />
+        public void OnConnection(object application, ext_ConnectMode connectMode, object addInInst, ref Array custom)
+        {
+            _applicationObject = (DTE2)application;
+            _addInInstance = (AddIn)addInInst;
 
-            if (connectMode == ext_ConnectMode.ext_cm_Startup)
+            if (connectMode == ext_ConnectMode.ext_cm_UISetup)
+            {
+                InitHelperCommands();
+            }
+            else if (connectMode == ext_ConnectMode.ext_cm_Startup)
             {
                 Logger.Initialize(_applicationObject);
-                InitHelperCommands();
+
+                foreach (HelperCommand cmd in GetAllHelperCommands())
+                {
+                    _helperCommands.Add(_addInInstance.ProgID + "." + cmd.Name, cmd);
+                }
             }
         }
 
@@ -40,7 +48,7 @@ namespace Blacksand
             string toolsMenuName = "Tools";
 
             CommandBarPopup toolsPopup = GetTopMenuBar(toolsMenuName);
-            object[] contextGUIDS = new object[] {};
+            object[] contextGUIDS = new object[] { };
 
             foreach (HelperCommand cmd in GetAllHelperCommands())
             {
@@ -56,12 +64,11 @@ namespace Blacksand
 
                     if ((command != null) && (toolsPopup != null))
                     {
-                        _helperCommands.Add(_addInInstance.ProgID + "." + cmd.Name, cmd);
                         command.AddControl(toolsPopup.CommandBar, 1);
                     }
                 }
                 catch (System.ArgumentException)
-                {}
+                { }
             }
         }
 
@@ -70,7 +77,6 @@ namespace Blacksand
             HelperCommand[] allCmds = 
             {
                 new FormatCodeCommand(),
-                //new HelperCommand("FormatCode2", "FormatCode2", null),
             };
             return allCmds;
         }
@@ -80,6 +86,23 @@ namespace Blacksand
             CommandBar bar = ((CommandBars)_applicationObject.CommandBars)["MenuBar"];
             CommandBarControl barCtrl = bar.Controls[toplevelMenu];
             CommandBarPopup barPopup = (CommandBarPopup)barCtrl;
+
+            Logger.Initialize(_applicationObject);
+
+            foreach (CommandBarControl c in barPopup.Controls)
+            {
+                Logger.WriteMessage(c.Caption + ": " + c.Index);
+            }
+
+            object index = null;
+            barCtrl = barPopup.Controls["导入和导出设置..."];
+            if (barCtrl != null) index = barCtrl.Index;
+
+            barCtrl = barPopup.Controls.Add(MsoControlType.msoControlPopup, null, null, index);
+            barCtrl.BeginGroup = true;
+            barCtrl.Caption = "CodingHelper";
+
+            barPopup = (CommandBarPopup)barCtrl;
             return barPopup;
         }
 
@@ -119,8 +142,8 @@ namespace Blacksand
         /// <param name="neededText"></param>
         /// <param name="status"></param>
         /// <param name="commandText"></param>
-        public void QueryStatus(string commandName, vsCommandStatusTextWanted
-          neededText, ref vsCommandStatus status, ref object commandText)
+        public void QueryStatus(string commandName, vsCommandStatusTextWanted neededText,
+                                ref vsCommandStatus status, ref object commandText)
         {
             if (neededText == vsCommandStatusTextWanted.vsCommandStatusTextWantedNone)
             {

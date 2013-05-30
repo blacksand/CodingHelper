@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Blacksand.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="format_prog" Type="System.String" Scope="User">
+      <Value Profile="(Default)">d:\Program Files (x86)\UniversalIndentGUI_win32\indenters\uncrustify.exe</Value>
+    </Setting>
+    <Setting Name="format_param" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-c "d:\Program Files (x86)\UniversalIndentGUI_win32\config\uncrustify.cfg" --replace --no-backup "$(InFile)"</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

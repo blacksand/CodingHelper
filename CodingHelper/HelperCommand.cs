@@ -6,35 +6,18 @@ namespace Blacksand
 {
     abstract class HelperCommand
     {
-        public HelperCommand(string name, string description)
+        public HelperCommand(string name, string text, string description)
         {
-            _name = name;
-            _text = name;
-            _descritption = description;
+            Name = name;
+            Text = text;
+            Description = description;
         }
 
         abstract public object Execute(DTE2 application, AddIn addin, object varIn);
 
-        public string Text
-        {
-            get { return _text; }
-            set { _text = value; }
-        }
-
-        public string Name
-        {
-            get { return _name == null ? "" : _name; }
-            set { _name = value; }
-        }
-
-        public string Description
-        {
-            get { return _descritption; }
-            set { _descritption = value; }
-        }
-
-        private string _text;
-        private string _name;
-        private string _descritption;
+        public string Name { get; set; }
+        public string Text { get; set; }
+        public string Description { get; set; }
+        public Command NamedCommand { get; set; }
     }
 }

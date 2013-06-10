@@ -12,7 +12,7 @@ namespace Blacksand
     class FormatCodeCommand : HelperCommand
     {
         public FormatCodeCommand()
-            : base("FormatCode", "格式化选中的文本, 如果没有选择文本, 则格式化整个文件。")
+            : base("FormatCode", "格式化文本", "格式化选中的文本, 如果没有选择文本, 则格式化整个文件。")
         {}
 
         public override object Execute(DTE2 application, AddIn addin, object varIn)
@@ -55,7 +55,7 @@ namespace Blacksand
             string param = Properties.Settings.Default.format_param
                 .Replace("$(InFile)", tmpFile.Name)
                 .Replace("$(OutFile)", tmpFile.Name);
-            Logger.WriteMessage("call: " + cmd + " " + param);
+            //Logger.WriteMessage("call: " + cmd + " " + param);
 
             System.Diagnostics.Process proc = new System.Diagnostics.Process();
             proc.StartInfo.FileName = cmd;
@@ -70,7 +70,6 @@ namespace Blacksand
             {
                 string msg = proc.StandardOutput.ReadToEnd();
                 if (msg.Length > 0) Logger.WriteMessage(msg);
-
                 msg = proc.StandardError.ReadToEnd();
                 if (msg.Length > 0) Logger.WriteMessage(msg);
             }

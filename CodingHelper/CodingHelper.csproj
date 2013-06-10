@@ -44,6 +44,9 @@
     <Reference Include="Extensibility, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.VCCodeModel, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
@@ -72,15 +75,6 @@
     <COMReference Include="EnvDTE">
       <Guid>{80CC9F66-E7D8-4DDD-85B6-D9E6CD0E93E2}</Guid>
       <VersionMajor>8</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>primary</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </COMReference>
-    <COMReference Include="EnvDTE100">
-      <Guid>{26AD1324-4B7C-44BC-84F8-B86AED45729F}</Guid>
-      <VersionMajor>10</VersionMajor>
       <VersionMinor>0</VersionMinor>
       <Lcid>0</Lcid>
       <WrapperTool>primary</WrapperTool>
@@ -128,7 +122,9 @@
     <Content Include="..\..\..\..\Documents\Visual Studio 2012\Addins\CodingHelper - For Testing.AddIn">
       <Link>CodingHelper - For Testing.AddIn</Link>
     </Content>
-    <Content Include="CodingHelper.AddIn" />
+    <Content Include="CodingHelper.AddIn">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

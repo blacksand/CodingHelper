@@ -14,7 +14,6 @@ namespace Blacksand
         /// <summary>实现外接程序对象的构造函数。请将您的初始化代码置于此方法内。</summary>
         public CodingHelper()
         {
-            _helperCommands = new Dictionary<string, HelperCommand>();
         }
 
         /// <summary>实现 IDTExtensibility2 接口的 OnConnection 方法。接收正在加载外接程序的通知。</summary>
@@ -24,30 +23,39 @@ namespace Blacksand
         /// <seealso class='IDTExtensibility2' />
         public void OnConnection(object application, ext_ConnectMode connectMode, object addInInst, ref Array custom)
         {
-            _applicationObject = (DTE2)application;
-            _addInInstance = (AddIn)addInInst;
+            _appObject = (DTE2)application;
+            _addIn = (AddIn)addInInst;
 
             if (connectMode == ext_ConnectMode.ext_cm_UISetup)
             {
+                // 在这里创建 NamedCommand2 对象, 不要关联到 Menu
                 InitHelperCommands();
             }
             else if (connectMode == ext_ConnectMode.ext_cm_Startup)
             {
-                Logger.Initialize(_applicationObject);
+                // 在这里取出 NamedCommand2, 并创建 Menu 关联
+                Logger.Initialize(_appObject);
+                string toolsMenuName = "Tools";
+                CommandBarPopup toolsPopup = GetTopMenuBar(toolsMenuName);
+                _helperCommands = new Dictionary<string, HelperCommand>();
 
                 foreach (HelperCommand cmd in GetAllHelperCommands())
                 {
-                    _helperCommands.Add(_addInInstance.ProgID + "." + cmd.Name, cmd);
+                    string fullName = _addIn.ProgID + "." + cmd.Name;
+                    cmd.NamedCommand = _appObject.Commands.Item(fullName);
+                    _helperCommands.Add(fullName, cmd);
+
+                    if ((cmd.NamedCommand != null) && (toolsPopup != null))
+                    {
+                        cmd.NamedCommand.AddControl(toolsPopup.CommandBar, toolsPopup.Controls.Count + 1);
+                    }
                 }
             }
         }
 
         private void InitHelperCommands()
         {
-            Commands2 allCommands = (Commands2)_applicationObject.Commands;
-            string toolsMenuName = "Tools";
-
-            CommandBarPopup toolsPopup = GetTopMenuBar(toolsMenuName);
+            Commands2 allCommands = (Commands2)_appObject.Commands;
             object[] contextGUIDS = new object[] { };
 
             foreach (HelperCommand cmd in GetAllHelperCommands())
@@ -55,17 +63,13 @@ namespace Blacksand
                 try
                 {
                     Command command = allCommands.AddNamedCommand2(
-                        _addInInstance, cmd.Name, cmd.Text, cmd.Description,
+                        _addIn, cmd.Name, cmd.Text, cmd.Description,
                         true, 59, ref contextGUIDS,
                         (int)vsCommandStatus.vsCommandStatusSupported +
                         (int)vsCommandStatus.vsCommandStatusEnabled,
                         (int)vsCommandStyle.vsCommandStylePictAndText,
                         vsCommandControlType.vsCommandControlTypeButton);
 
-                    if ((command != null) && (toolsPopup != null))
-                    {
-                        command.AddControl(toolsPopup.CommandBar, 1);
-                    }
                 }
                 catch (System.ArgumentException)
                 { }
@@ -83,22 +87,15 @@ namespace Blacksand
 
         private CommandBarPopup GetTopMenuBar(string toplevelMenu)
         {
-            CommandBar bar = ((CommandBars)_applicationObject.CommandBars)["MenuBar"];
+            CommandBar bar = ((CommandBars)_appObject.CommandBars)["MenuBar"];
             CommandBarControl barCtrl = bar.Controls[toplevelMenu];
             CommandBarPopup barPopup = (CommandBarPopup)barCtrl;
 
-            Logger.Initialize(_applicationObject);
-
-            foreach (CommandBarControl c in barPopup.Controls)
-            {
-                Logger.WriteMessage(c.Caption + ": " + c.Index);
-            }
-
             object index = null;
-            barCtrl = barPopup.Controls["导入和导出设置..."];
+            barCtrl = barPopup.Controls["Import and Export Settings..."];
             if (barCtrl != null) index = barCtrl.Index;
 
-            barCtrl = barPopup.Controls.Add(MsoControlType.msoControlPopup, null, null, index);
+            barCtrl = barPopup.Controls.Add(MsoControlType.msoControlPopup, index, null, index);
             barCtrl.BeginGroup = true;
             barCtrl.Caption = "CodingHelper";
 
@@ -168,6 +165,7 @@ namespace Blacksand
             ref object varIn, ref object varOut, ref bool handled)
         {
             handled = false;
+            Logger.Initialize(_appObject);
 
             if (executeOption == vsCommandExecOption.vsCommandExecOptionDoDefault)
             {
@@ -176,13 +174,13 @@ namespace Blacksand
                 if (_helperCommands.TryGetValue(commandName, out cmd))
                 {
                     handled = true;
-                    varOut = cmd.Execute(_applicationObject, _addInInstance, varIn);
+                    varOut = cmd.Execute(_appObject, _addIn, varIn);
                 }
             }
         }
 
-        private DTE2 _applicationObject;
-        private AddIn _addInInstance;
+        private DTE2 _appObject;
+        private AddIn _addIn;
         private Dictionary<string, HelperCommand> _helperCommands;
     }
 }

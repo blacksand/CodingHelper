@@ -44,6 +44,7 @@
     <Reference Include="Extensibility, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.VisualStudio.VCCodeModel, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
@@ -57,11 +58,18 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Big5ToGbkCommand.cs" />
+    <Compile Include="Big5ToGbkUnicodeCommand.cs" />
+    <Compile Include="ChineseConverter.cs" />
     <Compile Include="CodeRange.cs" />
     <Compile Include="CodingHelper.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="CommentSurroundCommand.cs" />
+    <Compile Include="EncodingConvertCommand.cs" />
     <Compile Include="FormatCodeCommand.cs" />
+    <Compile Include="GbkToBig5Command.cs" />
+    <Compile Include="GbkToBig5UnicodeCommand.cs" />
     <Compile Include="HelperCommand.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Properties\Settings.Designer.cs">

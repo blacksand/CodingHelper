@@ -27,8 +27,8 @@ class CodeRange
         if (ts.IsEmpty)
         {
             EditPoint pt = ts.ActivePoint.CreateEditPoint();
-
             FileCodeModel2 m = doc.DTE.ActiveDocument.ProjectItem.FileCodeModel as VCFileCodeModel;
+
             if (m != null)
             {
                 //PrintVcCodeElements(pt, m.Parent.ContainingProject.CodeModel.CodeElements);
@@ -54,9 +54,10 @@ class CodeRange
             }
             else
             {
-                Logger.WriteMessage("Can't find scope, use all document.");
                 range = new CodeRange(
-                    doc.StartPoint.CreateEditPoint(), doc.EndPoint.CreateEditPoint());
+                    doc.StartPoint.CreateEditPoint(),
+                    doc.EndPoint.CreateEditPoint());
+                Logger.WriteMessage("Can't find scope, use all document.");
             }
         }
         else
@@ -211,7 +212,9 @@ class CodeRange
             try
             {
                 elem = codeModel.CodeElementFromPoint(pt, elemType);
-                if (elem != null) break;
+
+                if (elem != null)
+                    break;
             }
             catch
             {

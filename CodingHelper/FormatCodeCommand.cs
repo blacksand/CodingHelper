@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using EnvDTE;
 using EnvDTE80;
 
@@ -12,25 +8,28 @@ namespace Blacksand
     class FormatCodeCommand : HelperCommand
     {
         public FormatCodeCommand()
-            : base("FormatCode", "格式化文本", "格式化选中的文本, 如果没有选择文本, 则格式化整个文件。")
+            : base("FormatCode",
+                   "格式化文本",
+                   "格式化选中的文本, 如果没有选择文本, 则格式化整个文件。")
         {}
 
         public override object Execute(DTE2 application, AddIn addin, object varIn)
         {
-            if (application.ActiveDocument != null)
+            Document theDoc = application.ActiveDocument;
+
+            if (theDoc != null)
             {
 	            try
 	            {
-                    TextDocument doc = (TextDocument) application.ActiveDocument.Object("TextDocument");
+                    application.UndoContext.Open("Format Code");
+                    TextDocument doc = (TextDocument) theDoc.Object("TextDocument");
 	                CodeRange range = CodeRange.FromDocument(doc);
-                    //////////////////////////////////////////////////////////////////////////
                     Logger.WriteMessage(range.ToString());
-                    //////////////////////////////////////////////////////////////////////////
 
                     if (!range.IsEmpty)
 	                {
 		                string text = range.Text;
-                        string extName = System.IO.Path.GetExtension(application.ActiveDocument.Name);
+                        string extName = System.IO.Path.GetExtension(theDoc.Name);
                         ExternalFormat(ref text, extName);
 		                ApplyIndent(ref text, range.IndentColumn);
 		                PutTextBack(range, text);
@@ -40,6 +39,10 @@ namespace Blacksand
 	            {
 	                Logger.WriteMessage("格式化代码时发生错误: " + ex.Message);
 	            }
+                finally
+                {
+                    application.UndoContext.Close();
+                }
             }
 
             return null;
@@ -69,13 +72,19 @@ namespace Blacksand
             if (proc.Start())
             {
                 string msg = proc.StandardOutput.ReadToEnd();
-                if (msg.Length > 0) Logger.WriteMessage(msg);
+
+                if (msg.Length > 0)
+                    Logger.WriteMessage(msg);
+
                 msg = proc.StandardError.ReadToEnd();
-                if (msg.Length > 0) Logger.WriteMessage(msg);
+                
+                if (msg.Length > 0)
+                    Logger.WriteMessage(msg);
             }
             else
             {
-                throw new Exception("执行外部程序出错: " + proc.StandardError.ReadToEnd());
+                throw new Exception("执行外部程序出错: "
+                                    + proc.StandardError.ReadToEnd());
             }
 
             text = tmpFile.Read();
@@ -89,7 +98,8 @@ namespace Blacksand
             if (indentCount > 0 && text.Length > 0)
             {
                 StringBuilder sb = new StringBuilder();
-                foreach (string line in text.Split(new string[]{"\r\n", "\r", "\n"}, StringSplitOptions.None))
+                foreach (string line in text.Split(new string[]{"\r\n", "\r", "\n"},
+                                                   StringSplitOptions.None))
                 {
                     if (line.Length > 0)
                         sb.AppendLine(line.Insert(0, new String(' ', indentCount)));
@@ -107,10 +117,11 @@ namespace Blacksand
             if (!range.EndPoint.AtEndOfDocument)
                 text = text.TrimEnd();
 
-            range.BeginPoint.ReplaceText(range.EndPoint, text,
-                (int) vsEPReplaceTextOptions.vsEPReplaceTextKeepMarkers +
-                (int) vsEPReplaceTextOptions.vsEPReplaceTextTabsSpaces +
-                (int)vsEPReplaceTextOptions.vsEPReplaceTextNormalizeNewlines);
+            range.BeginPoint.ReplaceText(
+                range.EndPoint, text,
+                (int) vsEPReplaceTextOptions.vsEPReplaceTextKeepMarkers |
+                (int) vsEPReplaceTextOptions.vsEPReplaceTextTabsSpaces |
+                (int) vsEPReplaceTextOptions.vsEPReplaceTextNormalizeNewlines);
         }
 
     }

@@ -8,5 +8,11 @@
     <Setting Name="format_param" Type="System.String" Scope="User">
       <Value Profile="(Default)">-c "d:\Program Files (x86)\UniversalIndentGUI_win32\config\uncrustify.cfg" --replace --no-backup "$(InFile)"</Value>
     </Setting>
+    <Setting Name="comment_pad" Type="System.Char" Scope="User">
+      <Value Profile="(Default)">-</Value>
+    </Setting>
+    <Setting Name="comment_length" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">78</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

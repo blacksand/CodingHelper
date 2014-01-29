@@ -81,6 +81,11 @@ namespace Blacksand
             HelperCommand[] allCmds = 
             {
                 new FormatCodeCommand(),
+                new CommentSurroundCommand(),
+                new GbkToBig5Command(),
+                new Big5ToGbkCommand(),
+                new GbkToBig5UnicodeCommand(),
+                new Big5ToGbkUnicodeCommand(),
             };
             return allCmds;
         }
